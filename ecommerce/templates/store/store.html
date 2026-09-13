@@ -4,18 +4,21 @@
 	<div class="row">
 		{% for product in products %}
 		<div class="col-lg-4">
-			<img class="thumbnail" src="{{product.imageURL}}">
-			<div class="box-element product">
-				<h6><strong>{{product.name}}</strong></h6>
-				<hr>
+			<div class="product-card">
+				<div class="thumbnail-wrap">
+					<img class="thumbnail" src="{{product.imageURL}}" alt="{{product.name}}">
+				</div>
+				<div class="box-element product">
+					<h6><strong>{{product.name}}</strong></h6>
+					<hr>
 
-				<div style="display: flex; gap:1em; justify-content: space-between;">
-					<div>
-						<button data-product="{{product.id}}" data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button>
-						<a class="btn btn-outline-success" href="#">View</a>		
+					<div class="product-actions">
+						<div class="product-buttons">
+							<button data-product="{{product.id}}" data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button>
+							<a class="btn btn-outline-success" href="{% url 'product_detail' product.id %}">View</a>
+						</div>
+						<h4 class="product-price"><strong>${{product.price}}</strong></h4>
 					</div>
-				
-					<h4><strong>${{product.price}}</strong></h4>
 				</div>
 			</div>
 		</div>

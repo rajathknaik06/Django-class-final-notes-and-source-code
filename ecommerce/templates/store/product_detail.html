@@ -1,0 +1,169 @@
+{% extends 'store/main.html' %}
+{% load static %}
+{% block content %}
+<div class="product-page">
+	<a class="back-link" href="{% url 'store' %}">&larr; Back to store</a>
+
+	<div class="box-element product-hero">
+		<div class="product-hero-grid">
+			<div class="product-media">
+				<div class="product-gallery">
+					<img src="{{ product.imageURL }}" alt="{{ product.name }}">
+				</div>
+			</div>
+			<div class="product-info">
+				<p class="product-type">{% if product.digital %}Digital Product{% else %}Physical Product{% endif %}</p>
+				<h1 class="product-title">{{ product.name }}</h1>
+
+				<div class="info-section">
+					<h5 class="section-label">Rating</h5>
+					{% if product.review_count %}
+					<div class="rating-line">
+						<span class="stars">
+							{% for i in rating_range %}
+								{% if i <= product.average_rating %}★{% else %}☆{% endif %}
+							{% endfor %}
+						</span>
+						<span class="rating-score">{{ product.average_rating }}/5</span>
+						<span class="rating-count">{{ product.review_count }} review{{ product.review_count|pluralize }}</span>
+					</div>
+					{% else %}
+					<p class="muted-text">No ratings yet</p>
+					{% endif %}
+				</div>
+
+				<div class="info-section">
+					<h5 class="section-label">Price & Discount</h5>
+					<div class="price-block">
+						{% if product.discount_percent %}
+							<span class="old-price">${{ product.price|floatformat:2 }}</span>
+							<span class="new-price">${{ product.discounted_price|floatformat:2 }}</span>
+							<span class="discount-badge">{{ product.discount_percent }}% OFF</span>
+						{% else %}
+							<span class="new-price">${{ product.price|floatformat:2 }}</span>
+							<span class="no-discount">No discount</span>
+						{% endif %}
+					</div>
+				</div>
+
+				<div class="info-section">
+					<h5 class="section-label">Description</h5>
+					<p class="product-desc">{{ product.description|default:"No description available for this product." }}</p>
+				</div>
+
+				<div class="info-section">
+					<h5 class="section-label">Delivery Details</h5>
+					<ul class="detail-list">
+						<li>{{ product.delivery_info }}</li>
+						{% if product.digital %}
+						<li>Instant digital access after purchase</li>
+						{% else %}
+						<li>Secure packaging and tracked shipping</li>
+						{% endif %}
+					</ul>
+				</div>
+
+				<div class="action-row">
+					<button data-product="{{ product.id }}" data-action="add" class="btn btn-warning update-cart">Add to Cart</button>
+					<a class="btn btn-success" href="{% url 'cart' %}">Go to Cart</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="box-element product-specs">
+		<h4 class="section-heading">Product Details</h4>
+		<table class="specs-table">
+			<tr>
+				<th>Product Name</th>
+				<td>{{ product.name }}</td>
+			</tr>
+			<tr>
+				<th>Original Price</th>
+				<td>${{ product.price|floatformat:2 }}</td>
+			</tr>
+			<tr>
+				<th>Discount</th>
+				<td>{% if product.discount_percent %}{{ product.discount_percent }}% OFF{% else %}None{% endif %}</td>
+			</tr>
+			<tr>
+				<th>Offer Price</th>
+				<td>${{ product.discounted_price|floatformat:2 }}</td>
+			</tr>
+			<tr>
+				<th>Delivery</th>
+				<td>{{ product.delivery_info }}</td>
+			</tr>
+			<tr>
+				<th>Type</th>
+				<td>{% if product.digital %}Digital{% else %}Physical{% endif %}</td>
+			</tr>
+			<tr>
+				<th>Average Rating</th>
+				<td>{% if product.review_count %}{{ product.average_rating }}/5 ({{ product.review_count }}){% else %}Not rated{% endif %}</td>
+			</tr>
+		</table>
+	</div>
+
+	<div class="row reviews-layout">
+		<div class="col-lg-7">
+			<div class="box-element">
+				<h4 class="section-heading">Customer Reviews</h4>
+				{% if reviews %}
+					{% for review in reviews %}
+					<div class="review-card">
+						<div class="review-header">
+							<div class="review-avatar">{{ review.name|make_list|first|upper }}</div>
+							<div>
+								<strong>{{ review.name }}</strong>
+								<div class="stars small-stars">
+									{% for i in rating_range %}{% if i <= review.rating %}★{% else %}☆{% endif %}{% endfor %}
+								</div>
+							</div>
+							<small class="review-date">{{ review.date_added|date:"M d, Y" }}</small>
+						</div>
+						<p class="review-comment">{{ review.comment }}</p>
+					</div>
+					{% endfor %}
+				{% else %}
+					<p class="muted-text">No reviews yet. Be the first to review this product.</p>
+				{% endif %}
+			</div>
+		</div>
+		<div class="col-lg-5">
+			<div class="box-element review-form-card">
+				<h4 class="section-heading">Write a Review</h4>
+				{% if messages %}
+					{% for message in messages %}
+						<div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %}">{{ message }}</div>
+					{% endfor %}
+				{% endif %}
+				<form method="POST" class="review-form">
+					{% csrf_token %}
+					{% if not request.user.is_authenticated %}
+					<div class="form-group">
+						<label>Your Name</label>
+						<input class="form-control" type="text" name="name" required>
+					</div>
+					{% endif %}
+					<div class="form-group">
+						<label>Rating</label>
+						<select class="form-control" name="rating">
+							<option value="5">5 - Excellent</option>
+							<option value="4">4 - Good</option>
+							<option value="3">3 - Average</option>
+							<option value="2">2 - Poor</option>
+							<option value="1">1 - Terrible</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label>Your Review</label>
+						<textarea class="form-control" name="comment" rows="4" required placeholder="Share your experience with this product"></textarea>
+					</div>
+					<button type="submit" class="btn btn-primary btn-block">Submit Review</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock content %}
